@@ -1,0 +1,73 @@
+---
+title: "A2.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(psych)
+library(corrplot)
+
+dim(decathlon)
+
+pdf("corrplot.pdf",paper="special",width=15,height=8)
+corrplot(cor(decathlon))
+
+fa4 = factanal(covmat=cor(decathlon),factors=4,rotation="none")
+colSums(fa4$loadings^2)
+
+fa3 = factanal(covmat=cor(decathlon),factors=3,rotation="none")
+colSums(fa3$loadings^2)
+
+fa2 = factanal(covmat=cor(decathlon),factors=2,rotation="none")
+colSums(fa2$loadings^2)
+
+#it seems a model with 2 latent factors will be appropriate based on the loadings.
+```
+
+```{r}
+plt = fa2$loadings[,c(1,2)]
+pdf("rotationcheck.pdf",paper="special",width=15,height=8)
+par(mfrow=c(1,2))
+plot(plt, type="n")
+text(plt,labels=names(decathlon))
+fa2_varimax = factanal(covmat=cor(decathlon),factors=2,rotation="varimax")
+plt = fa2_varimax$loadings[,c(1,2)]
+plot(plt,type="n")
+text(plt,labels=names(decathlon))
+```
+
+```{r}
+fa = factanal(decathlon,factors=2,scores="regression",rotation="varimax")
+pdf("modelcheck.pdf",paper="special",width=15,height=8)
+pairs.panels(fa$scores)
+```
+
+```{r}
+library(mclust)
+mdl = Mclust(tt)
+summary(mdl)
+```
+
+
+```{r}
+pdf("scatterplotBIC.pdf",paper="special",width=15,height=8)
+plot(tt$y~tt$x, col=mdl$classification, main="BIC")
+```
+
+```{r}
+mdl1 = mclustICL(tt)
+summary(mdl1)
+```
+```{r}
+plot(tt$y~tt$x, col=mdl$classification)
+```
